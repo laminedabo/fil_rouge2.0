@@ -24,14 +24,33 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
     public function load(ObjectManager $manager)
     {
         $faker = Factory::create('fr_FR');
-    
-        for ($j=0; $j < 3; $j++) { 
-            $user = new User();                 
+
+        for ($j=0; $j < 12; $j++) {
+            if ($j<3) {
+                $user = new User();
+                $user -> setProfil($this -> getReference("ADMIN"));
+            }
+            elseif($j<6) {
+                $user = new CM();
+                $user -> setProfil($this -> getReference("CM"));
+            }
+            elseif ($j<9) {
+                $user = new Formateur();
+                $user -> setProfil($this -> getReference("FORMATEUR"));
+            }
+            else {
+                $user = new Apprenant();    
+                $user -> setProfil($this -> getReference("APPRENANT"));
+            }             
             $user -> setEmail($faker -> unique() -> email());
             $user -> setUsername(strtolower($faker->name()));
-            $user -> setProfil($this -> getReference(ProfilFixtures::ref));
             $password = $this -> encoder -> encodePassword($user,"passe");
             $user -> setPassword($password);
+            $user->setNom($faker->lastname);
+            $user->setPrenom($faker->firstname);
+            $user->setAvatar($faker->imageUrl());
+            $user -> setAdresse($faker->address);
+            $user->setUsername(strtolower($faker->name()));
             $manager -> persist($user);
             $manager -> flush();
         }

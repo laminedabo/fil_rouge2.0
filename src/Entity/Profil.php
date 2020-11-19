@@ -7,13 +7,50 @@ use App\Repository\ProfilRepository;
 use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 
 /**
  * @ApiResource(
- *  normalizationContext = {"groups" = {"profil_read"}}
+ *  normalizationContext = {"groups" = {"profil_read"}},
+ *  collectionOperations = {
+ *      "get" = {
+ *          "method" = "GET",
+ *          "path" = "/admin/profils",
+ *          "security" = "is_granted('ROLE_ADMIN')",
+ *          "security_message" = "action non autorisé",
+ *          "normalizationContext" = {"groups" = {"profil_user_read"}}
+ *      },
+ *      "post" = {
+ *          "method" = "POST",
+ *          "path" = "/admin/profils",
+ *          "security" = "is_granted('ROLE_ADMIN')",
+ *          "security_message" = "action non autorisé",
+ *      }
+ * },
+ * itemOperations = {
+ *      "get" = {
+ *          "method" = "GET",
+ *          "path" = "/admin/profils/{id}",
+ *          "security" = "is_granted('ROLE_ADMIN')",
+ *          "security_message" = "accès non autorisé",
+ *          "normalizationContext" = {"groups" = {"profil_read"}}
+ *      },
+ *      "put" = {
+ *          "method" = "PUT",
+ *          "path" = "/admin/profils/{id}",
+ *          "security" = "is_granted('ROLE_ADMIN')",
+ *          "security_message" = "action non autorisé",
+ *      },
+ *      "delete" = {
+ *          "method" = "DELETE",
+ *          "path" = "/admin/profils{id}",
+ *          "security" = "is_granted('ROLE_ADMIN')",
+ *          "security_message" = "action non autorisé",
+ *      }
+ * }
  * )
  * @ApiFilter(SearchFilter::class, properties={"etat":"exact", "libelle":"exact"})
  * @ORM\Entity(repositoryClass=ProfilRepository::class)
@@ -24,24 +61,25 @@ class Profil
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"profil_read"})
+     * @Groups({"profil_read","profil_user_read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"profil_read"})
+     * @Groups({"profil_read","profil_user_read"})
      */
     private $libelle;
 
     /**
      * @ORM\OneToMany(targetEntity=User::class, mappedBy="profil")
+     * @ApiSubresource()
      * @Groups({"profil_read"})
      */
     private $users;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true, options={"default":"actif"})
      */
     private $etat;
 
